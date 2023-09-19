@@ -8,6 +8,7 @@
 #include <QSerialPort>
 #include <QThread>
 #include <iostream>
+#include <sys/ioctl.h>
 
 #include "QRegularExpression"
 
@@ -37,8 +38,8 @@ QString GetNextPreviousCommand(QString current)
 {
   if (currentIndex < previousCommands.size())
   {
-    const QString returnValue = previousCommands[currentIndex];
-    currentIndex++;
+    int oldIndex = currentIndex++;
+    const QString returnValue = previousCommands[oldIndex];
     return returnValue;
   }
   return current;
@@ -106,6 +107,9 @@ int main(int argc, char** argv)
     exit(1);
   }
 
+  struct winsize windowSize;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &windowSize);
+
   QTextStream consoleOutput(stdout);
 
   while (true)
@@ -150,7 +154,11 @@ int main(int argc, char** argv)
       }
       if (userInput.contains('\n'))
         break;
-      consoleOutput << "\r                                  \r";
+      consoleOutput << "\r";
+      for (int i = 0; i < windowSize.ws_col; ++i)
+        consoleOutput << " ";
+      consoleOutput << "\r";
+
       consoleOutput.flush();
     }
     userInput.remove("\n");
