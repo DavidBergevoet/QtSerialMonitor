@@ -147,9 +147,17 @@ int main(int argc, char** argv)
         }
         break;
       }
+      case 127: // Backspace
+      {
+        userInput = userInput.remove(userInput.size() - 1, 1);
+        break;
+      }
       default:
       {
-        userInput += c;
+        if (std::isprint(c) || c == 10)
+          userInput += c;
+        else
+          consoleOutput << "\nCharacter is not isprint " << (int)c << "\n";
       }
       }
       if (userInput.contains('\n'))
